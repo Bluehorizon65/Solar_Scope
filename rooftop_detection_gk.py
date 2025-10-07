@@ -14,7 +14,7 @@ import sys
 import argparse
 import os
 
-INPUT_IMAGE_PATH = "testcases/image copy 3.png"
+INPUT_IMAGE_PATH = "testcases/image copy 2.png"
 TOLERANCE_VALUES = [3, 2]
 
 TOLERANCE_VALUES = [3, 2]  # Test these tolerance values (±3, ±2)
@@ -201,18 +201,18 @@ def place_solar_panels_double_density(image, rooftop_mask):
 def place_solar_panels_custom(image, rooftop_mask, target_count, panel_width=40, panel_height=25):
     print(f"CUSTOM PANEL PLACEMENT")
     print(f"Target panels: {target_count}")
-    print(f"Panel size: {panel_width}x{panel_height} (FIXED)")
+    print(f"Starting with default panel size: {panel_width}x{panel_height}")
     print(f"Gap: 3px")
     print(f"Color: Blue")
     
     result_image = image.copy()
     
     contours, _ = cv2.findContours(rooftop_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
     
+    # Try default size first (40x25)
     possible_positions = []
-    gap = 3  # Increased gap for larger panels
+    gap = 3
     
     for contour in contours:
         x_cont, y_cont, w_cont, h_cont = cv2.boundingRect(contour)
@@ -226,13 +226,93 @@ def place_solar_panels_custom(image, rooftop_mask, target_count, panel_width=40,
                     total_pixels = panel_roi.size
                     coverage = rooftop_pixels / total_pixels
                     
-                    if coverage >= 0.4:  # Reduced from 60% to 40% minimum coverage
+                    if coverage >= 0.4:
                         possible_positions.append((x, y, coverage))
+    
+    # If not enough space, try medium size (30x20)
+    if len(possible_positions) < target_count:
+        print(f"Not enough space for {target_count} panels at 40x25, trying 30x20...")
+        panel_width, panel_height = 30, 20
+        gap = 2
+        possible_positions = []
+        
+        for contour in contours:
+            x_cont, y_cont, w_cont, h_cont = cv2.boundingRect(contour)
+            
+            for y in range(y_cont, y_cont + h_cont - panel_height + 1, panel_height + gap):
+                for x in range(x_cont, x_cont + w_cont - panel_width + 1, panel_width + gap):
+                    panel_roi = rooftop_mask[y:y+panel_height, x:x+panel_width]
+                    
+                    if panel_roi.size > 0:
+                        rooftop_pixels = np.sum(panel_roi == 255)
+                        total_pixels = panel_roi.size
+                        coverage = rooftop_pixels / total_pixels
+                        
+                        if coverage >= 0.3:
+                            possible_positions.append((x, y, coverage))
+    
+    # If still not enough, try smaller size (20x15)
+    if len(possible_positions) < target_count:
+        print(f"Still not enough space, trying 20x15...")
+        panel_width, panel_height = 20, 15
+        gap = 2
+        possible_positions = []
+        
+        for contour in contours:
+            x_cont, y_cont, w_cont, h_cont = cv2.boundingRect(contour)
+            
+            for y in range(y_cont, y_cont + h_cont - panel_height + 1, panel_height + gap):
+                for x in range(x_cont, x_cont + w_cont - panel_width + 1, panel_width + gap):
+                    panel_roi = rooftop_mask[y:y+panel_height, x:x+panel_width]
+                    
+                    if panel_roi.size > 0:
+                        rooftop_pixels = np.sum(panel_roi == 255)
+                        total_pixels = panel_roi.size
+                        coverage = rooftop_pixels / total_pixels
+                        
+                        if coverage >= 0.25:
+                            possible_positions.append((x, y, coverage))
+    
+    # If still not enough, try micro size (12x8)
+    if len(possible_positions) < target_count:
+        print(f"Still not enough space, trying micro panels 12x8...")
+        panel_width, panel_height = 12, 8
+        gap = 1
+        possible_positions = []
+        
+        for contour in contours:
+            x_cont, y_cont, w_cont, h_cont = cv2.boundingRect(contour)
+            
+            for y in range(y_cont, y_cont + h_cont - panel_height + 1, panel_height + gap):
+                for x in range(x_cont, x_cont + w_cont - panel_width + 1, panel_width + gap):
+                    panel_roi = rooftop_mask[y:y+panel_height, x:x+panel_width]
+                    
+                    if panel_roi.size > 0:
+                        rooftop_pixels = np.sum(panel_roi == 255)
+                        total_pixels = panel_roi.size
+                        coverage = rooftop_pixels / total_pixels
+                        
+                        if coverage >= 0.15:
+                            possible_positions.append((x, y, coverage))
     
     possible_positions.sort(key=lambda pos: pos[2], reverse=True)
     
     panels_placed = 0
     used_positions = set()
+    
+    # Adjust text size based on panel size
+    if panel_width >= 30:
+        font_scale = 0.7
+        font_thickness = 2
+        text_offset = 8
+    elif panel_width >= 20:
+        font_scale = 0.5
+        font_thickness = 1
+        text_offset = 6
+    else:
+        font_scale = 0.3
+        font_thickness = 1
+        text_offset = 4
     
     for x, y, coverage in possible_positions:
         if panels_placed >= target_count:
@@ -247,19 +327,25 @@ def place_solar_panels_custom(image, rooftop_mask, target_count, panel_width=40,
         
         if not overlap:
             cv2.rectangle(result_image, (x, y), (x + panel_width, y + panel_height), (255, 0, 0), -1)
-            cv2.rectangle(result_image, (x, y), (x + panel_width, y + panel_height), (0, 0, 0), 2)
+            cv2.rectangle(result_image, (x, y), (x + panel_width, y + panel_height), (0, 0, 0), 1)
             
             panel_num = panels_placed + 1
-            text_x = x + panel_width // 2 - 10
-            text_y = y + panel_height // 2 + 5
-            cv2.rectangle(result_image, (text_x-8, text_y-12), (text_x+16, text_y+3), (0, 0, 0), -1)
+            text_x = x + panel_width // 2 - text_offset
+            text_y = y + panel_height // 2 + 3
+            
+            # Add text background for better visibility on larger panels
+            if panel_width >= 20:
+                cv2.rectangle(result_image, (text_x-text_offset, text_y-10), 
+                            (text_x+text_offset*2, text_y+2), (0, 0, 0), -1)
+            
             cv2.putText(result_image, str(panel_num), (text_x, text_y), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                       cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), font_thickness)
             
             used_positions.add((x, y))
             panels_placed += 1
     
     print(f"Successfully placed {panels_placed} out of {target_count} requested panels")
+    print(f"Final panel size used: {panel_width}x{panel_height}")
     return result_image, panels_placed
 
 
