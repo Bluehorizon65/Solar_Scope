@@ -1,0 +1,76 @@
+# AI-Powered Solar Invoice Generator - Requirements
+# ================================================
+
+# Core FastAPI Framework & Web Server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Google Gemini AI Integration
+google-genai==0.3.0
+
+# PDF Generation & Document Processing
+reportlab==4.0.7
+
+# Data Processing & Analysis
+pandas==2.1.3
+
+# Date/Time Handling (built-in)
+# datetime - Built into Python standard library
+
+# File Operations (built-in)
+# tempfile, os - Built into Python standard library
+
+# Type Hints (built-in in Python 3.8+)
+# typing - Built into Python standard library
+
+# Alternative PDF Generation (for gemini_api.py)
+# weasyprint==60.2
+
+# Optional: Development & Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Optional: HTTP Client for Testing
+requests==2.31.0
+
+# System Requirements:
+# - Python >= 3.8
+# - Operating System: Windows/Linux/macOS
+# - Memory: 4GB RAM minimum, 8GB recommended
+# - Storage: 200MB for dependencies + document storage
+# - Internet: Required for Gemini AI API access
+# - API Requirements: Google Gemini AI API key
+
+# Installation:
+# pip install -r requirements.txt
+
+# Usage:
+# python ai_invoice_server.py
+
+# Key Dependencies Explained:
+# - fastapi: Modern web framework for building APIs with automatic OpenAPI docs
+# - uvicorn: Lightning-fast ASGI server for running FastAPI applications
+# - pydantic: Data validation and settings management using Python type annotations
+# - google-genai: Official Google Gemini AI Python client for content generation
+# - reportlab: Powerful library for creating professional PDF documents
+# - pandas: Data manipulation and analysis library for CSV processing
+
+# Development Tools:
+# - pytest: Testing framework for comprehensive unit and integration tests
+# - pytest-asyncio: Testing support for async/await functions
+# - requests: HTTP library for API testing and client examples
+
+# Configuration Notes:
+# 1. Obtain Gemini API key from Google AI Studio (https://makersuite.google.com/app/apikey)
+# 2. Configure API key in ai_invoice_server.py
+# 3. Ensure solar_prices.csv is present for pricing data
+# 4. Run test_ai_invoice.py to verify installation
+
+# Features Enabled by Dependencies:
+# - AI-powered content generation via Gemini AI
+# - Professional PDF document creation with ReportLab
+# - RESTful API with automatic documentation
+# - Robust error handling and fallback mechanisms
+# - Comprehensive testing framework
+# - CSV-based pricing data integration
