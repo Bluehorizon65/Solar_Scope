@@ -158,3 +158,9 @@ python rooftop_detection_gk.py --panels 50
 ## 📝 License
 
 MIT License - Feel free to use and modify!
+
+
+## using the roof top api
+
+`sleep 3 && curl -X POST "http://localhost:8000/detect-rooftop" -H "Content-Type: application/json" -d '{"image_path": "testcases/image copy 2.png", "num_panels": 25}'`
+

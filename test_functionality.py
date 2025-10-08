@@ -6,6 +6,8 @@ Quick test of the rooftop FastAPI functionality
 
 import sys
 import os
+
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from rooftop_fastapi import process_rooftop_detection
