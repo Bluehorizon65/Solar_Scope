@@ -14,7 +14,7 @@ import sys
 import argparse
 import os
 
-INPUT_IMAGE_PATH = "testcases/image.png"
+INPUT_IMAGE_PATH = "testcases/image copy 3.png"
 TOLERANCE_VALUES = [3, 2]
 
 TOLERANCE_VALUES = [3, 2]  # Test these tolerance values (±3, ±2)
