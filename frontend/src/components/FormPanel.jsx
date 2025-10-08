@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function FormPanel({ location, onInvoice }){
+export default function FormPanel({ location, onInvoice, onResults }){
   const [systemCapacity, setSystemCapacity] = useState('')
   const [preferredBrand, setPreferredBrand] = useState('')
   const [optimizeOrientation, setOptimizeOrientation] = useState('')
@@ -15,6 +15,8 @@ export default function FormPanel({ location, onInvoice }){
   const [tilt, setTilt] = useState('')
   const [azimuth, setAzimuth] = useState('')
   const [status, setStatus] = useState('Ready')
+  const [solarResults, setSolarResults] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const collect = ()=> ({
     systemCapacity: parseFloat(systemCapacity)||0,
@@ -57,7 +59,10 @@ export default function FormPanel({ location, onInvoice }){
 
   const handleSendSolar = async ()=>{
     if (!location) return setStatus('Pick location first')
+    setLoading(true)
     setStatus('Sending to backend...')
+    setSolarResults(null) // Clear previous results
+    
     try{
       const payload = {
         latitude: parseFloat(location.lat) || 0,
@@ -79,11 +84,24 @@ export default function FormPanel({ location, onInvoice }){
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
+      
       if (!res.ok) throw new Error('HTTP '+res.status)
-      const json = await res.json().catch(()=>null)
-      setStatus(json && json.message ? `Success: ${json.message}` : 'Sent successfully')
-      console.log('backend response', json)
-    }catch(e){ console.error(e); setStatus('Send failed') }
+      
+      const json = await res.json()
+      setSolarResults(json)
+      setStatus(json && json.success ? `Success: ${json.message}` : 'Calculation completed')
+      console.log('Solar calculation results:', json)
+      
+      // Pass results to parent component
+      if (onResults) onResults(json)
+      
+    }catch(e){ 
+      console.error(e)
+      setStatus('Calculation failed: ' + e.message)
+      setSolarResults(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -162,7 +180,10 @@ export default function FormPanel({ location, onInvoice }){
       <div className="d-grid gap-2">
         <button className="btn btn-gradient btn-lg rounded-pill" onClick={handleGenerate}><i className="bi bi-lightning-fill me-2"></i>Generate solar design</button>
         <button className="btn btn-outline-gradient btn-lg rounded-pill" onClick={handleInvoice}><i className="bi bi-receipt me-2"></i>Generate invoice</button>
-        <button className="btn btn-primary btn-lg rounded-pill" onClick={handleSendSolar}><i className="bi bi-send me-2"></i>Send to backend</button>
+        <button className="btn btn-primary btn-lg rounded-pill" onClick={handleSendSolar} disabled={loading}>
+          <i className={`bi ${loading ? 'bi-arrow-clockwise' : 'bi-send'} me-2`}></i>
+          {loading ? 'Calculating...' : 'Calculate Solar System'}
+        </button>
       </div>
 
       <div className="mt-3 small text-muted">{status}</div>

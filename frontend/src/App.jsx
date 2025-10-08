@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import MapPicker from './components/MapPicker'
 import FormPanel from './components/FormPanel'
+import SolarResults from './components/SolarResults'
 
 export default function App(){
   const [location, setLocation] = useState(null)
   const [lastInvoiceUrl, setLastInvoiceUrl] = useState(null)
+  const [solarResults, setSolarResults] = useState(null)
 
   return (
     <div className="app-root">
@@ -32,9 +34,22 @@ export default function App(){
           </div>
 
           <div className="col-lg-5">
-            <FormPanel location={location} onInvoice={(url)=> setLastInvoiceUrl(url)} />
+            <FormPanel 
+              location={location} 
+              onInvoice={(url)=> setLastInvoiceUrl(url)}
+              onResults={(results)=> setSolarResults(results)}
+            />
           </div>
         </div>
+
+        {/* Solar Results Section */}
+        {solarResults && (
+          <div className="row g-4 mt-2">
+            <div className="col-12">
+              <SolarResults data={solarResults} />
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="footer text-center py-3">© Solar Premium</footer>
