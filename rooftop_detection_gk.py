@@ -14,7 +14,7 @@ import sys
 import argparse
 import os
 
-INPUT_IMAGE_PATH = "testcases/image copy 2.png"
+INPUT_IMAGE_PATH = "testcases/image.png"
 TOLERANCE_VALUES = [3, 2]
 
 TOLERANCE_VALUES = [3, 2]  # Test these tolerance values (±3, ±2)
@@ -424,6 +424,55 @@ def main(args=None):
             
             print(f"Coverage: {coverage_pct:.1f}%")
             
+            # Simple rooftop measurements
+            contours, _ = cv2.findContours(rooftop_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            if contours:
+                # Get ALL contours to find the full polygon dimensions
+                all_points = []
+                for contour in contours:
+                    for point in contour:
+                        all_points.append(point[0])
+                
+                if all_points:
+                    all_points = np.array(all_points)
+                    # Get the full bounding rectangle of ALL rooftop areas
+                    x_min = np.min(all_points[:, 0])
+                    x_max = np.max(all_points[:, 0])
+                    y_min = np.min(all_points[:, 1])
+                    y_max = np.max(all_points[:, 1])
+                    
+                    # Full polygon dimensions
+                    full_width = x_max - x_min
+                    full_height = y_max - y_min
+                    length = max(full_width, full_height)
+                    breadth = min(full_width, full_height)
+                    
+                    # Get largest contour for area calculation
+                    largest_contour = max(contours, key=cv2.contourArea)
+                    pixel_count = cv2.countNonZero(rooftop_mask)
+                    area_pixels = cv2.contourArea(largest_contour)
+                    
+                    # Convert to meters (0.15m per pixel for zoom level 20)
+                    meters_per_pixel = 0.15
+                    length_m = length * meters_per_pixel
+                    breadth_m = breadth * meters_per_pixel
+                    area_m2 = area_pixels * (meters_per_pixel ** 2)
+                    total_roof_area_m2 = length_m * breadth_m  # Full rectangular roof area
+                    
+                    print(f"🏠 ROOFTOP: {pixel_count:,} pixels | Area: {area_pixels:,.0f}px² | Length: {length}px | Breadth: {breadth}px")
+                    print(f"📐 METERS: Length: {length_m:.1f}m | Breadth: {breadth_m:.1f}m | Detected Area: {area_m2:.1f}m²")
+                    print(f"🏗️  TOTAL ROOF: {length_m:.1f}m × {breadth_m:.1f}m = {total_roof_area_m2:.1f}m² (full polygon)")
+                    
+                    # Store measurements for averaging
+                    measurements = {
+                        'length_m': length_m,
+                        'breadth_m': breadth_m,
+                        'area_m2': area_m2,
+                        'total_roof_area_m2': total_roof_area_m2
+                    }
+                else:
+                    measurements = None
+            
             result_image_custom, panel_count_custom = place_solar_panels_custom(
                 image, rooftop_mask, num_panels)
             
@@ -433,6 +482,7 @@ def main(args=None):
                 'mask': rooftop_mask,
                 'result_custom': result_image_custom,
                 'panels_custom': panel_count_custom,
+                'measurements': measurements,
                 'mode': 'custom'
             })
         
@@ -453,6 +503,20 @@ def main(args=None):
                 best_result = result
         
         if best_result:
+            # Calculate average measurements from all tolerances
+            valid_measurements = [r['measurements'] for r in results if r['measurements'] is not None]
+            if valid_measurements:
+                avg_length = sum(m['length_m'] for m in valid_measurements) / len(valid_measurements)
+                avg_breadth = sum(m['breadth_m'] for m in valid_measurements) / len(valid_measurements)
+                avg_area = sum(m['area_m2'] for m in valid_measurements) / len(valid_measurements)
+                avg_total_roof = sum(m['total_roof_area_m2'] for m in valid_measurements) / len(valid_measurements)
+                
+                print(f"\n🎯 AVERAGE ROOF MEASUREMENTS:")
+                print(f"   📏 Length: {avg_length:.1f}m")
+                print(f"   📐 Breadth: {avg_breadth:.1f}m") 
+                print(f"   📊 Detected Area: {avg_area:.1f}m²")
+                print(f"   🏗️  Total Roof: {avg_length:.1f}m × {avg_breadth:.1f}m = {avg_total_roof:.1f}m²")
+            
             print(f"\n🎉 BEST RESULT:")
             print(f"   📊 Tolerance: ±{best_result['tolerance']}")
             print(f"   📈 Coverage: {best_result['coverage']:.1f}%")
