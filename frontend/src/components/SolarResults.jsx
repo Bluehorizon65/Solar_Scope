@@ -561,7 +561,7 @@ export default function SolarResults({ data }) {
                         {satellite.file_url && (
                           <div className="col-12">
                             <a 
-                              href={`http://localhost:3000${satellite.file_url}`} 
+                              href={`file:///C:/Users/Enemb/OneDrive/Documents/google_hackathon_AI/output_images/${satellite.filename}`}
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="btn btn-outline-primary btn-sm"
@@ -649,16 +649,17 @@ export default function SolarResults({ data }) {
                       </h6>
                     </div>
                     <div className="card-body text-center">
-                      <img 
-                        src={`http://localhost:3000${satellite.file_url}`} 
-                        alt="Satellite view of location" 
-                        className="img-fluid rounded shadow-sm"
-                        style={{ maxHeight: '400px' }}
-                        onError={(e) => {
-                          e.target.style.display = 'none'
-                          e.target.nextSibling.style.display = 'block'
-                        }}
-                      />
+                      <img
+  src={`http://localhost:3000/output_images/${satellite.filename}`}
+  alt="Satellite view of location"
+  className="img-fluid rounded shadow-sm"
+  style={{ maxHeight: '400px' }}
+  onError={(e) => {
+    e.target.style.display = 'none';
+    e.target.nextSibling.style.display = 'block';
+  }}
+/>
+
                       <div style={{ display: 'none' }} className="text-muted">
                         <i className="bi bi-exclamation-triangle mb-2" style={{ fontSize: '2rem' }}></i>
                         <p>Unable to load satellite image</p>
@@ -667,6 +668,18 @@ export default function SolarResults({ data }) {
                   </div>
                 </div>
               )}
+
+              <div className="col-12 mt-4 text-center">
+                <a 
+                  href="http://127.0.0.1:5000/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  <i className="bi bi-robot me-2"></i>
+                  Open ML Model Server
+                </a>
+              </div>
             </div>
           )}
         </div>

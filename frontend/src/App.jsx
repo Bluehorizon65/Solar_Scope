@@ -12,7 +12,7 @@ export default function App(){
     <div className="app-root">
       <nav className="navbar custom-nav">
         <div className="container d-flex justify-content-between align-items-center">
-          <span className="brand">Solar Premium</span>
+          <span className="brand">Solar</span>
         </div>
       </nav>
 
@@ -52,7 +52,7 @@ export default function App(){
         )}
       </main>
 
-      <footer className="footer text-center py-3">© Solar Premium</footer>
+      <footer className="footer text-center py-3">© Solar</footer>
     </div>
   )
 }

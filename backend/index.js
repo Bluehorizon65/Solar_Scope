@@ -8,6 +8,12 @@ import express from "express";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
+import cors from "cors";
+
+
+// ✅ Enable CORS for all routes
+
+
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +24,7 @@ const ROOFTOP_API = "http://localhost:8005/detect-rooftop";
 
 const SATELLITE_FOLDER = "C:\\Users\\Enemb\\OneDrive\\Documents\\google_hackathon_satalite\\satellite_images";
 
+app.use(cors());
 // Middleware
 app.use(express.json());
 
@@ -49,7 +56,7 @@ app.post("/solar", async (req, res) => {
       budget_inr: inputData.budget_inr,
       prefer_brand: inputData.prefer_brand,
       max_payback_years: inputData.max_payback_years,
-      num_panels: inputData.num_panels,
+      //num_panels: inputData.num_panels,
     };
 
     // --- Prepare Satellite payload ---
@@ -82,7 +89,7 @@ app.post("/solar", async (req, res) => {
     // --- Call Rooftop Detection API ---
     const rooftopPayload = {
       image_path: savedImagePath,
-      num_panels: inputData.num_panels,
+      num_panels: calcResponse.data.system_configuration.modules_count,
     };
 
     const rooftopResponse = await axios.post(ROOFTOP_API, rooftopPayload, { headers: { "Content-Type": "application/json" } });
@@ -105,6 +112,12 @@ app.post("/solar", async (req, res) => {
     tilt_angle: calcResponse.data.system_configuration.tilt_degrees,
   }
 });
+
+
+const OUTPUT_DIR = "C:/Users/Enemb/OneDrive/Documents/google_hackathon_AI/output_images";
+
+// Serve static files from that directory
+app.use("/output_images", express.static(OUTPUT_DIR));
 
 
     // --- Merge all results ---

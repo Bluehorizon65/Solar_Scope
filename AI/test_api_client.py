@@ -12,13 +12,13 @@ def test_rooftop_api():
     """Test the rooftop detection API"""
     
     # API endpoint
-    base_url = "http://localhost:8000"
+    base_url = "http://localhost:8005"
     endpoint = f"{base_url}/detect-rooftop"
     
     # Test data
     test_data = {
         "image_path": "testcases/image copy 2.png",
-        "num_panels": 25
+        "num_panels": 3
     }
     
     print("🔋 TESTING ROOFTOP DETECTION API")
@@ -60,14 +60,14 @@ def test_rooftop_api():
         print("Make sure the API server is running:")
         print("   python rooftop_api_server.py")
         print("   OR")
-        print("   uvicorn rooftop_api_server:app --host 0.0.0.0 --port 8000 --reload")
+        print("   uvicorn rooftop_api_server:app --host 0.0.0.0 --port 8005 --reload")
     except Exception as e:
         print(f"❌ Unexpected Error: {e}")
 
 def test_api_health():
     """Test API health endpoint"""
     try:
-        response = requests.get("http://localhost:8000/health")
+        response = requests.get("http://localhost:8005/health")
         if response.status_code == 200:
             print("✅ API Health Check: OK")
             print(f"   Status: {response.json()}")
@@ -80,7 +80,7 @@ def test_api_health():
 def test_list_images():
     """Test the list test images endpoint"""
     try:
-        response = requests.get("http://localhost:8000/test-images")
+        response = requests.get("http://localhost:8005/test-images")
         if response.status_code == 200:
             data = response.json()
             print("📁 Available Test Images:")

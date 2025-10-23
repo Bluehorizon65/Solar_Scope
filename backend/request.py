@@ -13,9 +13,8 @@ payload = {
     "budget_inr": 600000,
     "prefer_brand": "Jinko",
     "max_payback_years": 7,
-    "num_panels": 25,
     "location_name": "Karunya",
-    "zoom_level": 6
+    "zoom_level": 6 
 }
 
 response = requests.post(url, json=payload)
