@@ -32,7 +32,6 @@ uvicorn api:app --port 8007 --reload
 ```
 for simulation
 ```
-```
 python .\web.py
 ```
 
